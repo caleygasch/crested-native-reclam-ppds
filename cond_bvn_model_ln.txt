@@ -1,0 +1,44 @@
+
+########### for models on log scale ###################
+
+#### model for wishart:
+##model { V ~ dwish(R, 3) }
+
+## model for normal:
+#model{ Y ~ dmnorm(mu, R) }
+
+
+### model for normal with prior for mu
+
+model { for(i in 1:12){ Y[1,i] ~ dnorm(mu[1], tone)
+    Y[2,i] ~ dnorm(Ym[i], tm)
+
+Ym[i]<- mu[2]+(omega[2]/omega[1])*rho*(Y[1,i]-mu[1])
+
+}
+
+for(j in 1:2){ mu[j] ~ dnorm(0,0.00001)}
+
+tone<-omega[1]^(-2)
+tm<-( (omega[2]^2)*(1-rho^2) )^(-1)
+
+sigma[1,2]<-(rho*omega[1]*omega[2])
+sigma[2,1]<-sigma[1,2]
+
+sigma[1,1]<-(omega[1])^2
+sigma[2,2]<-(omega[2])^2
+
+omega[1]~dunif(0,10)
+omega[2]~dunif(0,10)
+#omega[1]~dgamma(.001,.001)
+#omega[2]~dgamma(0.001,0.001)
+rho~dunif(-1,1)
+
+tau[1:2,1:2]<-inverse(sigma[,])
+
+Ypredln ~ dmnorm(mu,tau)
+
+Ypred[1] <- exp(Ypredln[1])
+Ypred[2] <- exp(Ypredln[2])
+
+} 
